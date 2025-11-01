@@ -8,6 +8,7 @@ import Link from 'next/link';
 const VALID_ZIP_CODES = [
   '20147', '20148', '20164', '20165', // Loudoun County, VA
   '28092', '28090', // Lincoln County, NC
+  '84003', '84005', '84043', // Lehi, UT
 ];
 
 export default function ZipCodePage() {
@@ -31,7 +32,7 @@ export default function ZipCodePage() {
     // Check if zip code is in our coverage area
     if (!VALID_ZIP_CODES.includes(zipCode)) {
       setError(
-        'Sorry, VoterEd is currently only available in Loudoun County, VA and Lincoln County, NC. Check back soon for expanded coverage!'
+        'Sorry, VoterEd is currently only available in Loudoun County, VA, Lincoln County, NC, and Lehi, UT. Check back soon for expanded coverage!'
       );
       setIsLoading(false);
       return;
@@ -175,6 +176,20 @@ export default function ZipCodePage() {
                     />
                   </svg>
                   Lincoln County, North Carolina
+                </li>
+                <li className="flex items-start gap-2">
+                  <svg
+                    className="w-5 h-5 text-patriot-blue-700 mt-0.5 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Lehi, Utah
                 </li>
               </ul>
             </div>
