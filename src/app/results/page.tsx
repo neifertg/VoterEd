@@ -37,6 +37,7 @@ export default function ResultsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedCandidate, setSelectedCandidate] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'office' | 'all'>('office');
   const router = useRouter();
 
   useEffect(() => {
@@ -116,6 +117,23 @@ export default function ResultsPage() {
     return 'text-patriot-red-600';
   };
 
+  // Group candidates by office and get top match for each
+  const getOfficeGroups = () => {
+    const officeMap = new Map<string, CandidateMatch[]>();
+
+    matches.forEach((candidate) => {
+      const existing = officeMap.get(candidate.office) || [];
+      officeMap.set(candidate.office, [...existing, candidate]);
+    });
+
+    // Sort candidates within each office by match percentage
+    officeMap.forEach((candidates, office) => {
+      candidates.sort((a, b) => b.matchPercentage - a.matchPercentage);
+    });
+
+    return officeMap;
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
@@ -180,8 +198,163 @@ export default function ResultsPage() {
             </div>
           ) : (
             <>
-              {/* Candidate Cards */}
-              <div className="space-y-6 mb-8">
+              {/* View Toggle */}
+              <div className="mb-6 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setViewMode('office')}
+                    className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                      viewMode === 'office'
+                        ? 'bg-patriot-blue-600 text-white'
+                        : 'bg-white text-slate-700 border-2 border-slate-300 hover:bg-slate-50'
+                    }`}
+                  >
+                    By Office
+                  </button>
+                  <button
+                    onClick={() => setViewMode('all')}
+                    className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                      viewMode === 'all'
+                        ? 'bg-patriot-blue-600 text-white'
+                        : 'bg-white text-slate-700 border-2 border-slate-300 hover:bg-slate-50'
+                    }`}
+                  >
+                    All Candidates
+                  </button>
+                </div>
+                <p className="text-sm text-slate-600">
+                  {matches.length} candidate{matches.length !== 1 ? 's' : ''} found
+                </p>
+              </div>
+
+              {/* Office-Grouped View */}
+              {viewMode === 'office' && (
+                <div className="space-y-8 mb-8">
+                  {Array.from(getOfficeGroups().entries()).map(([office, candidates]) => {
+                    const topCandidate = candidates[0];
+                    const isExpanded = selectedCandidate === topCandidate.id;
+                    const issueMap = new Map(issues.map((i) => [i.id, i.title]));
+
+                    return (
+                      <div key={office} className="bg-white rounded-xl shadow-md overflow-hidden">
+                        {/* Office Header */}
+                        <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
+                          <h3 className="text-xl font-bold text-slate-900">{office}</h3>
+                          <p className="text-sm text-slate-600 mt-1">
+                            {candidates.length} candidate{candidates.length !== 1 ? 's' : ''} running
+                          </p>
+                        </div>
+
+                        {/* Top Match */}
+                        <div className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="inline-block px-2 py-1 bg-patriot-blue-100 text-patriot-blue-800 text-xs font-bold rounded">
+                                  BEST MATCH
+                                </span>
+                              </div>
+                              <h2 className="text-2xl font-bold text-slate-900 mb-1">
+                                {topCandidate.name}
+                              </h2>
+                              <span className="inline-block px-3 py-1 bg-slate-100 text-slate-700 text-sm font-medium rounded-full">
+                                {topCandidate.party}
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-2xl ${getMatchColor(topCandidate.matchPercentage)}`}>
+                                {topCandidate.matchPercentage}%
+                              </div>
+                              <p className={`text-sm font-medium mt-1 ${getMatchColor(topCandidate.matchPercentage).split(' ')[0]}`}>
+                                {getMatchLabel(topCandidate.matchPercentage)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <p className="text-slate-700 mb-4">{topCandidate.bio}</p>
+
+                          {/* Other Candidates in this race */}
+                          {candidates.length > 1 && (
+                            <div className="mb-4">
+                              <p className="text-sm font-medium text-slate-600 mb-2">
+                                Other candidates:
+                              </p>
+                              <div className="space-y-2">
+                                {candidates.slice(1).map((candidate) => (
+                                  <div key={candidate.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                    <div>
+                                      <p className="font-medium text-slate-900">{candidate.name}</p>
+                                      <p className="text-sm text-slate-600">{candidate.party}</p>
+                                    </div>
+                                    <div className={`px-3 py-1 rounded-lg font-semibold ${getMatchColor(candidate.matchPercentage)}`}>
+                                      {candidate.matchPercentage}%
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Toggle Details */}
+                          <button
+                            onClick={() => setSelectedCandidate(isExpanded ? null : topCandidate.id)}
+                            className="text-patriot-blue-700 hover:text-patriot-blue-800 font-semibold flex items-center gap-2"
+                          >
+                            {isExpanded ? 'Hide' : 'Show'} detailed breakdown
+                            <svg
+                              className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+
+                          {/* Detailed Breakdown */}
+                          {isExpanded && (
+                            <div className="mt-6 pt-6 border-t border-slate-200">
+                              <h3 className="font-semibold text-slate-900 mb-4">
+                                Issue-by-Issue Comparison
+                              </h3>
+                              <div className="space-y-3">
+                                {topCandidate.agreementDetails.map((detail) => {
+                                  const issueTitle = issueMap.get(detail.issueId) || 'Unknown Issue';
+
+                                  return (
+                                    <div key={detail.issueId} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                                      <div className={`text-2xl ${getAgreementColor(detail.difference)}`}>
+                                        {getAgreementIcon(detail.difference)}
+                                      </div>
+                                      <div className="flex-1">
+                                        <h4 className="font-medium text-slate-900 mb-1">{issueTitle}</h4>
+                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                          <div>
+                                            <span className="text-slate-600">Your position:</span>
+                                            <p className="font-medium text-slate-900">{getPositionLabel(detail.userPosition)}</p>
+                                          </div>
+                                          <div>
+                                            <span className="text-slate-600">Candidate position:</span>
+                                            <p className="font-medium text-slate-900">{getPositionLabel(detail.candidatePosition)}</p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* All Candidates View */}
+              {viewMode === 'all' && (
+                <div className="space-y-6 mb-8">
                 {matches.map((candidate) => {
                   const isExpanded = selectedCandidate === candidate.id;
                   const issueMap = new Map(issues.map((i) => [i.id, i.title]));
@@ -270,7 +443,8 @@ export default function ResultsPage() {
                     </div>
                   );
                 })}
-              </div>
+                </div>
+              )}
 
               {/* Actions */}
               <div className="bg-white rounded-xl shadow-md p-6">
