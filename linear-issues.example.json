@@ -1,0 +1,19 @@
+{
+  "issues": [
+    {
+      "title": "Create voter registration page",
+      "description": "Build a page where users can learn about voter registration requirements and find links to register in their state.\n\n**Acceptance Criteria:**\n- Display state-specific requirements\n- Links to official registration sites\n- Check registration status\n- Mobile responsive design",
+      "priority": 2
+    },
+    {
+      "title": "Add candidate comparison feature",
+      "description": "Allow users to compare two or more candidates side-by-side.\n\n**Tasks:**\n- [ ] Create comparison UI component\n- [ ] Fetch candidate data from API\n- [ ] Display positions on key issues\n- [ ] Add print/share functionality",
+      "priority": 2
+    },
+    {
+      "title": "Implement user authentication",
+      "description": "Add user login and registration functionality.\n\n**Technical Details:**\n- Use NextAuth.js\n- Support email/password and OAuth\n- Implement JWT tokens\n- Add password reset flow",
+      "priority": 1
+    }
+  ]
+}

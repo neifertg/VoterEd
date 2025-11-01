@@ -6,7 +6,8 @@
       "Bash(gh auth:*)",
       "Bash(gh repo list:*)",
       "Bash(npx tailwindcss:*)",
-      "Bash(taskkill //F //PID 20660)"
+      "Bash(taskkill //F //PID 20660)",
+      "Bash(node scripts/create-issues.mjs:*)"
     ],
     "deny": [],
     "ask": []

@@ -42,3 +42,8 @@ next-env.d.ts
 # IDE
 .vscode
 .idea
+
+# Linear issue files (keep example only)
+linear-issues.json
+*-issues.json
+!linear-issues.example.json
