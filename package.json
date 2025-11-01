@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "linear:create": "node scripts/create-issues.mjs"
+    "linear:create": "node scripts/create-issues.mjs",
+    "seed:lehi": "node scripts/seed-lehi.mjs"
   },
   "repository": {
     "type": "git",
