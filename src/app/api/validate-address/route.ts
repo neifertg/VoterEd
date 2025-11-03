@@ -38,10 +38,11 @@ export async function GET(request: Request) {
     const response = await fetch(url);
     const data = await response.json();
 
-    // Check for API not enabled error
+    // Check for API not available error (representatives endpoint not accessible)
     if (!response.ok && data.error?.code === 404) {
-      console.error('Google Civic API not enabled or not found:', data.error);
-      // Fallback to zip code if provided
+      console.error('Google Civic API representatives endpoint not available:', data.error);
+      // The representatives endpoint is not accessible with this API configuration
+      // Fall back to zip code mode
       if (/^\d{5}$/.test(address.trim())) {
         return NextResponse.json({
           success: true,
@@ -53,7 +54,7 @@ export async function GET(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Address validation service unavailable. Please enable the Google Civic Information API in your Google Cloud Console, or use just your zip code.'
+          error: 'Full address validation is not available. Please use just your 5-digit zip code instead.'
         },
         { status: 503 }
       );
